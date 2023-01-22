@@ -1,19 +1,18 @@
-# FRÅGA JOHANNES OM HJÄLP MED ATT VÄLJA VAPEN I BÖRJAN AV STRID
-# 
-# 
-# IMPORTS
 import os
 # ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # KLASSER
 class Spelare:
-  def __init__(self, hp, max_hp, dmg, rustning, pengar, ryggsäck):
+  def __init__(self, namn, hp, max_hp, dmg, rustning, pengar, ryggsäck, hölster):
+    self.namn = namn
     self.hp = hp
     self.max_hp = max_hp
     self.dmg = dmg
     self.rustning =  rustning
     self.pengar = pengar
-    self.ryggsäck = [Vapen("svärd", 10, 1), Vapen("Båge", 12, 1), Vapen("Klubba", 12, 1)]
-    
+    self.ryggsäck = [Föremål("Äpple", 0, 5, 10)]
+    self.hölster = [Vapen("Svärd", 10, 10, 1)]  
+    # Vapen("fett op svärd", 500000, 10, 1), Vapen("fett trash svärd", 1, 10, 1)
+
 class Monster:
   def __init__(self, namn, hp, max_hp, dmg, rustning, svaghet, värde, liv, utseende):
     self.namn = namn
@@ -27,31 +26,224 @@ class Monster:
     self.utseende = utseende
 
 class Vapen:
-  def __init__(self, namn, dmg, mängd):
+  def __init__(self, namn, dmg, värde, mängd):
     self.namn = namn
     self.dmg = dmg
+    self.värde = värde
     self.mängd = mängd
-  def __str__(self):
-    return(self.namn)
 
 class Föremål:
-  def __init__(self, namn, healing, dmg):
+  def __init__(self, namn, dmg, healing, värde):
     self.namn = namn
-    self.healing = healing
     self.dmg = dmg
-  def __str__(self):
-    return(self.namn)
+    self.healing = healing
+    self.värde = värde
+
+class Rustning:
+  def __init__(self, namn, skydd, värde):
+    self.namn = namn
+    self.skydd = skydd
+    self.värde = värde
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # FUNKTIONER
 def rensa():
   os.system('cls' if os.name == 'nt' else 'clear')
 
+def shop(spelare, vapen_till_salu, föremål_till_salu, rustning_till_salu):
+  print(r''' SHOPPEN  
+                          *        /\                     *
+ *            *            *  /\  //\\  *        *
+                       /\    //\\///\\\     *  /\               *
+          *      *    //\\ *///\////\\\\  /\  //\\
+  *      /\     *    /  ^ \/^ ^/^  ^  ^ \/^ \/  ^ \     *
+        / ^\ *  /\  / ^   /  ^/ ^ ^ ^   ^\ ^/  ^^  \
+       /^   \  / ^\/ ^ ^   ^ / ^  ^    ^  \/ ^   ^  \       *
+   *  /  ^ ^ \/^  ^\ ^ ^ ^   ^  ^   ^   ____  ^   ^  \     /|\
+     / ^ ^  ^ \ ^  _\___________________|  |_____^ ^  \   /||o\
+ *  / ^^  ^ ^ ^\  /______________________________\ ^ ^ \ /|o|||\
+   /  ^  ^^ ^ ^  /________________________________\  ^  /|||||o|\
+  /^ ^  ^ ^^  ^    ||___|___||||||||||||___|__|||    ^ /||o||||||\       
+ / ^   ^   ^    ^  ||___|___||||||||||||___|__|||   ^   ^  | |           
+/ ^ ^ ^  ^  ^  ^   ||||||||||||||||||||||||||||||oooooooooo| |ooooooo  
+ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
 
-def läggtill_i_ryggsäck(spelare, sak): 
-  spelare.ryggsäck.append(sak)
+tryck enter för att fortsätta...''')
+  input()
+  rensa()
+  while True:
+    print(r'''  HANDELSMANNEN
+  __________                       __________
+  \   ____  \ ____________________/  ____   /
+    \    \  ◜                     ◝  /    /
+       \   |   ______       _____  |   /
+          \|   (_ↂ__)      (_ↂ__)  |/
+           |        ()  ()         |            )       )
+            \      ⋀_____⋀       /              (    (
+              ◟_______________◞                  )  )
+                 //// ~~~ \\\\\                  ( (
+               ////// ||| \\\\\\                  )
+             ///////  |||  \\\\\\\               ) (  
+      __________________________________________(___)____
+    [____________________________________________________]
+      )   =========================================   (
+      /  /                                         \  \
+    <__/                                             \__> ''')
+    print("\nVÄLKOMMEN TILL SHOPPEN\n")
+    print("1. KÖP FÖREMÅL")
+    print("2. KÖP VAPEN")
+    print("3. KÖP RUSTNING")
+    print("4. SÄLJ UTRUSTNING")
+    print("5. PRATA")
+    print("6. LÄMNA SHOPPEN")
+    val = input("\nVad vill du göra?")
+    if val == "1":
+      rensa()
+      print(" TILL SALU:\n")
+      print(f"Du har {spelare.pengar} mynt. \n")
+      for i, föremål in enumerate(föremål_till_salu):
+        print(f"{i+1}. {föremål.namn} - {föremål.värde} mynt")
+      print("\nTryck enter för att inte köpa något.")
+      sak_val = input("\nVilken uppgradering skulle du vilja köpa?")
+      if not sak_val.strip():
+        print("ingenting alltså")
+        input()
+        rensa()
+        continue
+      sak_val = int(sak_val)
+      föremål = föremål_till_salu[sak_val - 1]
+      if spelare.pengar >= föremål.värde:
+        spelare.pengar -= föremål.värde
+        spelare.ryggsäck.append(föremål)
+        print(f"Du har köpt {föremål.namn} för {föremål.värde} mynt.")
+        input()
+        rensa()
+      else: 
+        print("\nDu har inte tillräckligt med mynt för att köpa detta föremål.")
+        input()
+        rensa()    
+    elif val == "2":
+      rensa()
+      print("VAPEN TILL SALU:\n")
+      print(f"Du har {spelare.pengar} mynt. \n")
+      for i, vapen in enumerate(vapen_till_salu):
+        print(f"{i+1}. {vapen.namn} - {vapen.värde} mynt")
+      print("\nTryck enter för att inte köpa något.")
+      sak_val = input("\nVilken uppgradering skulle du vilja köpa?")
+      if not sak_val.strip():
+        print("ingenting alltså")
+        input()
+        rensa()
+        continue
+      sak_val = int(sak_val)
+      vapen = vapen_till_salu[sak_val - 1]
+      if spelare.pengar >= vapen.värde:
+        spelare.pengar -= vapen.värde
+        spelare.hölster.append(vapen)
+        print(f"Du har köpt {vapen.namn} för {vapen.värde} mynt.")
+        vapen_till_salu.remove(vapen)
+        input()
+        rensa()
+      else: 
+        print("\nDu har inte tillräckligt med mynt för att köpa detta vapen.")
+        input()
+        rensa()   
+    elif val == "3":
+      rensa()
+      print("RUSTNING TILL SALU:\n")
+      print(f"Du har {spelare.pengar} mynt. \n")
+      for i, rustning in enumerate(rustning_till_salu):
+        print(f"{i+1}. {rustning.namn} - {rustning.värde} mynt")
+      print("\nTryck enter för att inte köpa något.")
+      sak_val = input("\nVilken uppgradering skulle du vilja köpa?")
+      if not sak_val.strip():
+        print("Ingenting alltså.")
+        input()
+        rensa()
+        continue
+      sak_val = int(sak_val)
+      rustning = rustning_till_salu[sak_val - 1]
+      if spelare.pengar >= rustning.värde:
+        spelare.pengar -= rustning.värde
+        spelare.rustning += rustning.skydd
+        print(f"Du har köpt {rustning.namn} för {rustning.värde} mynt.")
+        rustning_till_salu.remove(rustning)
+        print(f"Monster kommer nu göra {rustning.skydd} mindre skada med varje attack")
+        input()
+        rensa()
+      else: 
+        print("\nDu har inte tillräckligt med mynt för att köpa denna rustning.")
+        input()
+        rensa()         
+    elif val == "4":
+      rensa()
+      print("1. FÖREMÅL")
+      print("2. VAPEN")
+      val = int(input("\nVad vill du sälja?"))
+      if val == 1:
+        rensa()
+        print("DINA FÖREMÅL:\n")
+        print(f"Du har {spelare.pengar} mynt. \n")
+        for i, föremål in enumerate(spelare.ryggsäck):
+          print(f"{i+1}. {föremål.namn} - {föremål.värde} mynt")
+        print("\nTryck enter för att inte sälja något.")
+        sak_val = input("\nVad skulle du vilja sälja?")
+        if not sak_val.strip():
+          print("ingenting alltså")
+          input()
+          rensa()
+          continue
+        sak_val = int(sak_val)
+        föremål = spelare.ryggsäck[sak_val - 1]
+        spelare.pengar += föremål.värde
+        spelare.ryggsäck.remove(föremål)
+        print(f"Du har sålt {föremål.namn} för {föremål.värde} mynt.")
+        input()
+        rensa()    
+      elif val == 2: 
+        rensa()
+        print("DINA VAPEN:\n")
+        print(f"Du har {spelare.pengar} mynt. \n")
+        for i, vapen in enumerate(spelare.hölster):
+          print(f"{i+1}. {vapen.namn} - {vapen.värde} mynt")
+        print("\nTryck enter för att inte sälja något.")
+        sak_val = input("\nVad skulle du vilja sälja?")
+        if not sak_val.strip():
+          print("ingenting alltså")
+          input()
+          rensa()
+          continue
+        sak_val = int(sak_val)
+        vapen = spelare.hölster[sak_val - 1]
+        spelare.pengar += vapen.värde
+        spelare.ryggsäck.remove(vapen)
+        print(f"Du har sålt {vapen.namn} för {vapen.värde} mynt.")
+        input()
+        rensa()    
+    elif val == "5":
+        rensa()
+        print("FINT VÄDER IDAG. MMM.")
+        input()
+        rensa()
+    elif val == "6":
+        rensa()
+        print("LYCKA TILL MED DIN RESA FÖR ATT SLAKTA TATE MEN SE UPP FÖR JESUS...")
+        input()
+        rensa()
+        skid(alla_monster, spelare)
+    else:
+        print("Välj ett giltigt nummer")
+        continue
+
+
+def läggtill_i_hölster(spelare, vapen): 
+  spelare.hölster.append(vapen)
   
+def läggtill_i_ryggsäck(spelare, föremål):
+    spelare.ryggsäck.append(föremål)
 
-def strid(monster, spelare, namn): #DETTA ÄR STRIDSFUNKTIONEN
+    
+def strid(monster, spelare): #DETTA ÄR STRIDSFUNKTIONEN
   print("tryck enter för att fortsätta...")
   while spelare.hp > 0 and monster.hp > 0:
     while True:
@@ -62,134 +254,442 @@ def strid(monster, spelare, namn): #DETTA ÄR STRIDSFUNKTIONEN
     {monster.utseende}
     ''')
       
-
       print("-----------------------------\n1 SLÅSS --- 2 FLY --- 3 PRATA\n-----------------------------")
-      bara_vapen = []
-      for index, sak in enumerate(spelare.ryggsäck):
-        if type(sak) == Vapen:
-          print(f"{monster.namn} har {monster.hp} HP och {monster.dmg} DMG\n")
-          print(f"{namn} har {spelare.hp} HP och {spelare.dmg + sak.dmg} DMG")
-          print()
-          bara_vapen.append(sak)
+      print(f"{monster.namn} har {monster.hp} HP och {monster.dmg} DMG\n")
+      print(f"{spelare.namn} har {spelare.hp} HP och {spelare.dmg} DMG")
+      print()
 
       antal_vapen = []
+      antal_föremål = []
 
       svar = input("Vad vill du göra? ")
       if svar == "1":
-          print("\nTILLGÄNGLIGA VAPEN")
-          for index, sak in enumerate(bara_vapen):
-            print(f"{index+1}. {sak.namn}") #Skriver upp indexet på föremålet samt dess namn på alla föremål i ryggsäcken
+          if len(spelare.ryggsäck) > 0:
+            print("\nTILLGÄNGLIGA FÖREMÅL:")
+            for index, föremål in enumerate(spelare.ryggsäck):
+              print(f"{index + 1}. {föremål.namn}") 
+              antal_föremål.append(index)
+            print("\nTryck enter för att inte använda något föremål")
+            föremål_val = input("\nVilket föremål vill du använda?")
+            if not föremål_val.strip():
+              print("Du valde inget föremål")
+              input()
+              rensa()
+            else:
+              föremål_val = int(föremål_val)
+              if int(föremål_val - 1) in antal_föremål:
+                föremål = spelare.ryggsäck[föremål_val - 1]
+                spelare.ryggsäck.remove(föremål)
+                monster.hp -= föremål.dmg
+                spelare.hp += föremål.healing
+                print(f"Du valde {föremål.namn}")
+                if föremål.healing > 0: 
+                  print(f"Du healade {föremål.healing}, ditt nya HP är {spelare.hp}")
+                if föremål.dmg > 0: 
+                  print(f"Du gjorde {föremål.dmg} skada")
+          print("\nTILLGÄNGLIGA VAPEN: ")
+          for index, vapen in enumerate(spelare.hölster):
+            print(f"{index + 1}. {vapen.namn}") #Skriver upp indexet på föremålet samt dess namn på alla föremål i ryggsäcken
             antal_vapen.append(index)
-
-          vapenval = int(input("\nVilket vapen väljer du? "))
-          if int(vapenval) in antal_vapen:
-            sak = bara_vapen[vapenval - 1]
-            print(f"\nDu valde {sak.namn} och gör {spelare.dmg + sak.dmg} skada")
-            monster.hp -= (spelare.dmg + sak.dmg)
-            print(f"{monster.namn} slår tillbaka och gör {monster.dmg} skada\n")
-            spelare.hp -= monster.dmg
-            if monster.hp <= 0:
-              print(f"{monster.namn} har 0 hp")
-              print(f"\n1 SLAKTA {monster.namn} --- 2 SKONA {monster.namn}")
+          vapenval = input("\nVilket vapen väljer du? ")
+          if not vapenval.strip():
+            print("Du måste välja ett vapen")
+            continue
+          vapenval = int(vapenval)
+          if int(vapenval - 1) in antal_vapen:
+            vapen = spelare.hölster[vapenval - 1]
+            print(f"\nDu valde {vapen.namn} och gör {spelare.dmg + vapen.dmg} skada")
+            monster.hp -= (spelare.dmg + vapen.dmg)
+            monster_effektiv_skada = monster.dmg - spelare.rustning
+            print(f"{monster.namn} slår tillbaka och gör {monster_effektiv_skada} skada\n")
+            spelare.hp -= monster_effektiv_skada
+            if spelare.hp <= 0:
+              print(f"{spelare.namn} ÄR DÖD\n")
+              print("Tryck enter för att fortsätta...")
+              input()
+              rensa()
+              print("Vad vill du göra?")
+              omstart = input("1 FÖRSÖK MED STRIDEN IGEN --- 2 STARTA OM HELA SPELET\n")
+              if omstart == "1":
+                monster.hp = monster.max_hp
+                spelare.hp = spelare.max_hp
+                strid(monster, spelare)
+              elif omstart == "2": 
+                main()
+              else:
+                print("Välj ett giltigt nummer")
+                continue
+            elif monster.hp <= 0:
               while True:
+                print(f"{monster.namn} har 0 hp")
+                print(f"\n1 SLAKTA {monster.namn} --- 2 SKONA {monster.namn}")
                 svar = input("Vad vill du göra?")
                 if svar == "1":
                   rensa()
                   print(r'''
-                 _--------_
-               /            \
-              |   .-.  .-.   |
-              | )(__/  \__)( |
-              |/     /\     \|
-              (_     ^^     _)
-               \__IIIIIIII__/
-                | \IIIIII/ |
-                \          /
-                 \________/
+           _--------_
+         /            \
+        |   .-.  .-.   |
+        | )(__/  \__)( |
+        |/     /\     \|
+        (_     ^^     _)
+         \__IIIIIIII__/
+          | \IIIIII/ |
+          \          /
+           \________/
                 ''')
-                  print(f"{monster.namn} ÄR DÖD\n")
+                  print(f"{monster.namn} ÄR DÖD. DU TJÄNADE {monster.värde} MYNT\n")
+                  print(f"Du tar även 15% av {monster.namn}'s max HP, dvs {(0.15 * monster.max_hp)}")
+                  spelare.max_hp += 0.15 * monster.max_hp 
+                  spelare.hp = spelare.max_hp
                   monster.liv-=1
+                  spelare.pengar += monster.värde
                   input()
                   rensa()
                   if monster.namn == "Leif":
-                    läggtill_i_ryggsäck(spelare, klubba) #FIXA KLUBBA I FUNKTIONEN wqgwqgwqgwqgwgw
-                    print("Du slaktade Leif och som belöning får du en klubba")
+                    läggtill_i_hölster(spelare, klubba) 
+                    print("Du slaktade Leif och som belöning får du en klubba.")
+                    input()
+                    rensa()
                     return
+                  elif monster.namn == "Rolf":
+                    läggtill_i_ryggsäck(spelare, bomb)
+                    print("Du executade Rolf och som belöning får du 2 bomber. bomba.")
+                    alla_platser.append("Skogen")     
+                    input()
+                    rensa()
+                    skid(alla_monster, spelare)
+                  elif monster.namn == "Hector":
+                    läggtill_i_hölster(spelare, båge)
+                    print("Du halalslaktade Hector och som belöning får du en båge och ett bandage.")
+                    alla_platser.append("Alperna")          
+                    input()
+                    rensa()
+                    skid(alla_monster, spelare)
+                  elif monster.namn == "Gargamel":
+                    läggtill_i_hölster(spelare, trollstav)
+                    print("Du gratinerade Gargamel och som belöning får du en trollstav.")
+                    alla_platser.append("Sjön")
+                    input()
+                    rensa()
+                    skid(alla_monster, spelare)
+                  elif monster.namn == "Rune":
+                    läggtill_i_hölster(spelare, treudd)
+                    print("Du ruinerade Rune och som belöning får du en treudd.")
+                    alla_platser.append("Tate's mark")                   
+                    input()
+                    rensa()
+                    skid(alla_monster, spelare)
+                  elif monster.namn == "Tate warrior":
+                    läggtill_i_hölster(spelare, stort_svärd)
+                    print("Du dräpte Tate warrior och som belöning får du ett stort svärd, stort nog att ta ner Tate själv.")
+                    alla_platser.append("Tate Mansion")
+                    input()
+                    rensa()
+                    skid(alla_monster, spelare)
+                  elif monster.namn == "Andrew Tate":
+                    print("Andrew dricker sista droppen bubbelvatten innan han faller till marken.")
+                    print("Som belöning för att du tog ut Tate skickar Jesus tillbaka dig hem till jorden.")
+                    print("THE END")
+                    input()
+                    rensa()
+                    main()
+                  elif monster.namn == "Jesus":
+                    print("Jesus faller till marken och landar på ett kors.")
+                    print("Med Jesus död blir du nya ledaren av Boråsus.")
+                    print("THE END")
+                    input()
+                    rensa()
+                    main()
                 elif svar == "2": 
-                  spelare.dmg+=1
-                  print(f"\nDin barmhärtighet uppskattas av {monster.namn}. Som tack belönas du med 1 dmg. Din nya dmg är {spelare.dmg}") 
-                  return 
-                else:print("välj ett giltigt nummer")
-            elif spelare.hp <= 0:
-              print(f"{namn} ÄR DÖD\n")
-              print("Vill du börja om denna strid?")
-              omstart = input("1 JA --- 2 NEJ\n")
-              if omstart == "1":
-                monster.hp = monster.max_hp
-                spelare.hp = spelare.max_hp
-                strid(monster,spelare,namn)
-              elif omstart == "2":
-                skid(monster, spelare, namn)
-              else:
-                print("Välj ett giltigt nummer")
-                input()
-                rensa()
+                  spelare.hp = spelare.max_hp
+                  if monster.namn == "Jesus":
+                    print("Jesus låter sig inte skonas, och du tvingas slakta honom")
+                    print("Jesus faller till marken och landar på ett kors.")
+                    print("Med Jesus död blir du nya ledaren av Boråsus.")
+                    print("THE END")
+                    input()
+                    rensa()
+                    main()
+                  elif monster.namn == "Andrew Tate":
+                    print("Tate låter sig inte skonas, och du tvingas slakta honom")
+                    print("Andrew dricker sista droppen bubbelvatten innan han faller till marken.")
+                    print("Som belöning för att du tog ut Tate skickar Jesus tillbaka dig hem till jorden.")
+                    print("THE END")
+                    input()
+                    rensa()
+                    main()
+                  else:
+                    if monster.namn == "Leif":
+                      läggtill_i_hölster(spelare, klubba) 
+                      print(f"Du låter Leif gå och som belöning får du en klubba och {monster.värde} mynt.")
+                      spelare.pengar += monster.värde
+                      input()
+                      rensa()
+                      return
+                    elif monster.namn == "Rolf":
+                      läggtill_i_ryggsäck(spelare, bomb)
+                      print(f"Du låter Rolf gå och som belöning får du 2 bomber och {monster.värde} mynt")
+                      spelare.pengar += monster.värde
+                      alla_platser.append("Skogen")     
+                      input()
+                      rensa()
+                      skid(alla_monster, spelare)
+                    elif monster.namn == "Hector":
+                      läggtill_i_hölster(spelare, båge)
+                      print(f"Du halalslaktade Hector och som belöning får du en båge, ett bandage och {monster.värde} mynt")
+                      spelare.pengar += monster.värde
+                      alla_platser.append("Alperna")          
+                      input()
+                      rensa()
+                      skid(alla_monster, spelare)
+                    elif monster.namn == "Gargamel":
+                      läggtill_i_hölster(spelare, trollstav)
+                      print(f"Du låter Gargamel gå och som belöning får du en trollstav och {monster.värde} mynt")
+                      spelare.pengar += monster.värde
+                      alla_platser.append("Sjön")
+                      input()
+                      rensa()
+                      skid(alla_monster, spelare)
+                    elif monster.namn == "Rune":
+                      läggtill_i_hölster(spelare, treudd)
+                      print(f"Du låter Rune gå och som belöning får du en treudd och {monster.värde} mynt")
+                      spelare.pengar += monster.värde
+                      alla_platser.append("Tate's mark")                   
+                      input()
+                      rensa()
+                      skid(alla_monster, spelare)
+                    elif monster.namn == "Tate warrior":
+                      läggtill_i_hölster(spelare, stort_svärd)
+                      print(f"Du låter Tate warrior gå och som belöning får du ett stort svärd, stort nog att ta ner Tate själv, samt {monster.värde} mynt")
+                      spelare.pengar += monster.värde
+                      alla_platser.append("Tate Mansion")
+                      input()
+                      rensa()
+                      skid(alla_monster, spelare)
+                else:
+                  print("Välj ett giltigt nummer")
+                  input()
+                  rensa()
           else:
             print("Välj ett giltigt nummer")
-            input()
-            rensa()
+            continue
       elif svar == "2":
-        spelare.dmg -= 1
-        print(f"\nDu flyr och din omodighet minskar din dmg med 1. Din nya dmg är {spelare.dmg}")
-        input()
-        rensa()
-        return
-      elif svar == "3":
-        if monster.namn == "Leif" and monster.hp > 10:
-          print("Leif vill inte prata just nu, testa att mucka upp honom lite först")
+        if monster.namn == "Leif":
+          print("Du kan inte fly din första strid")
           break
-        elif monster.namn == "Leif" and monster.hp <= 10: 
-          print("Leif är rädd och erbjuder pengar för att få lämnas i fred. Han har 70 guldmynt till sitt namn\n")
+        else:
+          spelare.dmg -= 1
+          print(f"\nDu flyr och din omodighet minskar din dmg med 1. Din nya dmg är {spelare.dmg}")
+          input()
+          rensa()
+          skid(alla_monster, spelare)
+      elif svar == "3":
+        if monster.hp > 0.3 * monster.max_hp or monster.namn == "Andrew Tate" or monster.namn == "Jesus":
+          print(f"{monster.namn} vill inte prata just nu, testa att mucka upp honom lite först")
+          break
+        elif monster.hp < 0.3 * monster.max_hp:
+          print(f"{monster.namn} är rädd och erbjuder pengar för att få lämnas i fred. Han har {1.5*monster.värde} guldmynt till sitt namn\n")
           print("1 JA --- 2 NEJ\n")
           svar = input("Accepterar du hans erbjudande?")
           if svar == "1":
-            spelare.pengar +=70
-            print("Leif springer kvickt bort och lämnar dig med 70 guldmynt")
-            return
+            spelare.pengar += 1.5*monster.värde
+            spelare.hp = spelare.max_hp
+            print(f"{monster.namn} springer kvickt bort och lämnar dig med {1.5*monster.värde} guldmynt")
+            if monster.namn == "Leif":
+              input()
+              rensa()
+              return
+            elif monster.namn == "Rolf":
+              alla_platser.append("Skogen")     
+              input()
+              rensa()
+              skid(alla_monster, spelare)
+            elif monster.namn == "Hector":
+              alla_platser.append("Alperna")          
+              input()
+              rensa()
+              skid(alla_monster, spelare)
+            elif monster.namn == "Gargamel":
+              alla_platser.append("Sjön")
+              input()
+              rensa()
+              skid(alla_monster, spelare)
+            elif monster.namn == "Rune":
+              alla_platser.append("Tate's mark")                   
+              input()
+              rensa()
+              skid(alla_monster, spelare)
+            elif monster.namn == "Tate warrior":
+              alla_platser.append("Tate Mansion")
+              input()
+              rensa()
+              skid(alla_monster, spelare)
           elif svar == "2":
-            print("Finisha Leif")
+            break
+          else:
+            print("Välj ett giltigt nummer")
+            continue
       else:
             print("Välj ett giltigt nummer")      
-            input()
-            rensa()      
+            continue
 
 
 
 
-
-def skid(alla_monster, spelare, namn):
+def skid(alla_monster, spelare):
   while spelare.hp > 0:
     while True:
-      print("------------------------------------------------\n1 FORTSÄTT RESAN --- 2 RYGGSÄCK --- 3 REGELBOKEN\n------------------------------------------------")
-      svar = input("vad vill du göra?")
+      print("--------------------------------------------------------------------------------\n1 FORTSÄTT RESAN --- 2 RYGGSÄCK & HÖLSTER --- 3 SPELAR-ATTRIBUT --- 4 REGELBOKEN \n--------------------------------------------------------------------------------")
+      svar = input("Vad vill du göra?")
       if svar == "1": 
         rensa()
-        print("1 SHOPPEN --- 2 LÄGRET --- 3 ")
+        antal_platser = []
+        for index in enumerate(alla_platser):
+          print(f"{index[0] + 1}. {alla_platser[index[0]]}")
+          antal_platser.append(index)
         svar = input("Var vill du gå?")
-        if svar == "2" and alla_monster[1].liv == 1:
+        if not svar.strip():
+          print("Välj ett giltigt nummer")
+          input()
           rensa()
-          strid(alla_monster[1], spelare, namn)
-          # BELÖNINGAR FÖR ATT SLAKTA ROLF
+        elif int(svar) == 1:
+          rensa()
+          shop(spelare, vapen_till_salu, föremål_till_salu, rustning_till_salu)
+        elif int(svar) == 2 and alla_monster[1].liv == 1:
+          print(r''' 
+          LÄGRET                             
+                                     (**)
+                                   (*(**)*)
+                                  (*(****)*)
+                                      ||  
+            ^`````````.               ||
+           / \         \       \\/    ||
+          / ! \  ``     \             ||//
+         / "!  \     ``  \       )
+    \\  /___!___\_________\     (        _____
+                                __      @_____)
+                        \\/    (_))    @_@_____)
+      \\//                     ´'``   @_@_@_____)
+''')
+          input()
+          rensa()
+          strid(alla_monster[1], spelare)
           return
-      elif svar == "2": 
-        saker = ""
-        for sak in spelare.ryggsäck:
-          saker += sak.namn + " "
-        print(f"DIN RYGGSÄCK: {saker}")
-        print(f"MYNT: {spelare.pengar}")
+        elif int(svar) == 2 and alla_monster[1].liv == 0:
+          print("Lägret är tomt")
+          input()
+          rensa()
+        elif int(svar) == 3 and alla_monster[2].liv == 1:
+          rensa()
+          strid(alla_monster[2], spelare)
+        elif int(svar) == 3 and alla_monster[2].liv == 0:
+            print("skogen är tom")
+            input()
+            rensa()
+        elif int(svar) == 4 and alla_monster[3].liv == 1:
+          rensa()
+          strid(alla_monster[3], spelare)
+        elif int(svar) == 4 and alla_monster[3].liv == 0:
+            print("Bergen är tomma")
+            input()
+            rensa()
+        elif int(svar) == 5 and alla_monster[4].liv == 1:
+          rensa()
+          strid(alla_monster[4], spelare)
+        elif int(svar) == 5 and alla_monster[4].liv == 0:
+            print("Sjön är tom")
+            input()
+            rensa()
+        elif int(svar) == 6 and alla_monster[5].liv == 1:
+          rensa()
+          strid(alla_monster[5], spelare)
+        elif int(svar) == 6 and alla_monster[5].liv == 0:
+          print("Tate's mark är tom")
+          input()
+          rensa()
+        elif int(svar) == 7 and alla_monster[6].liv == 1 and alla_monster[7].liv == 1: 
+          print(r''' TATE MANSION
+                    
+            
+              *         .              *            _.-----._      
+                            ___   .            ___.'         '.   *
+        .              _____[LLL]______________[LLL]_____       \
+                      /     [LLL]         *    [LLL]     \       |
+                    /____________________________________\      |    .
+                      )==================================(      /
+    .      *         '|I .-. I .-. I .--. I .-. I .-. I|'    .'
+                  *    |I |+| I |+| I |. | I |+| I |+| I|- -'`       *
+                      |I_|+|_I_|+|_I_|__|_I_|+|_I_|+|_I|      .
+              .       /_I_____I_____I______I_____I_____I_\
+                      )================================(   *
+      *         _     |I .-. I .-. I .--. I .-. I .-. I|          *
+                |u|  __|I |+| I |+| I |<>| I |+| I |+| I|    _         .
+          __   |u|_|uu|I |+| I |+| I |~ | I |+| I |+| I| _ |U|     _
+      .  |uu|__|u|u|u,|I_|+|_I_|+|_I_|__|_I_|+|_I_|+|_I||n|| |____|u|
+          |uu|uu|_,.-' /I_____I_____I______I_____I_____I\`'-. |uu u|u|__
+          |uu.-'`      #############(______)#############    `'-. u|u|uu|
+        _.'`              ~"^"~   (________)   ~"^"^~           `'-.|uu|
+      ,''          .'    _                             _ `'-.        `'-.
+  ~"^"~    _,'~"^"~    _( )_                         _( )_   `'-.        ~"^"~
+      _  .'            |___|                         |___|      ~"^"~     _
+    _( )_              |_|_|          () ()          |_|_|              _( )_
+    |___|/\/\/\/\/\/\/\|___|/\/\/\/\/\|| ||/\/\/\/\/\|___|/\/\/\/\/\/\/\|___|
+    |_|_|\/\/\/\/\/\/\/|_|_|\/\/\/\/\/|| ||\/\/\/\/\/|_|_|\/\/\/\/\/\/\/|_|_|
+    |___|/\/\/\/\/\/\/\|___|/\/\/\/\/\|| ||/\/\/\/\/\|___|/\/\/\/\/\/\/\|___|
+    |_|_|\/\/\/\/\/\/\/|_|_|\/\/\/\/\/[===]\/\/\/\/\/|_|_|\/\/\/\/\/\/\/|_|_|
+    |___|/\/\/\/\/\/\/\|___|/\/\/\/\/\|| ||/\/\/\/\/\|___|/\/\/\/\/\/\/\|___|
+    |_|_|\/\/\/\/\/\/\/|_|_|\/\/\/\/\/|| ||\/\/\/\/\/|_|_|\/\/\/\/\/\/\/|_|_|
+    |___|/\/\/\/\/\/\/\|___|/\/\/\/\/\|| ||/\/\/\/\/\|___|/\/\/\/\/\/\/\|___|
+~""~|_|_|\/\/\/\/\/\/\/|_|_|\/\/\/\/\/|| ||\/\/\/\/\/|_|_|\/\/\/\/\/\/\/|_lc|~""~
+  [_____]            [_____]                       [_____]            [_____]
+  ''')
+          print("Du har äntligen anlänt till Tate Mansion.")
+          print("Tate välkommnar dig in och ställer dig en fråga.")
+          svar = input("Dricker du stilla eller bubbelvatten? \n 1 STILLA --- 2 BUBBEL")
+          if svar == "1":
+            print("Ditt svar är inte godtagbart i detta hus, endast fattiga personer dricker stilla vatten!")
+            input()
+            rensa()
+            strid(alla_monster[7], spelare)
+          elif svar == "2":
+            print("Bra min vän.")
+            input()
+            rensa()
+            print("Plötsligt kommer Jesus igenom fönstret med rasande illska och slår ner Tate snabbare än ögat kan se")
+            input()
+            rensa()
+            print("Tate kvider med sina sista andetag \"Mörda honom, det är han som är ledaren av Boråsus\"")
+            strid(alla_monster[6], spelare)
+        else:
+          print("Välj ett giltigt nummer")
+          input()
+          rensa()
+      elif svar == "2":
+        rensa()
+        print("HÖLSTER:")
+        antal_vapen = [""]
+        for index, vapen in enumerate(spelare.hölster):
+            print(f"{index + 1}. {vapen.namn} --- {vapen.dmg} skada.")
+            antal_vapen.append(index)
+        print("\nRYGGSÄCK:")
+        antal_föremål = [""]
+        for index, föremål in enumerate(spelare.ryggsäck):
+            print(f"{index + 1}. {föremål.namn} --- {föremål.dmg} skada och {föremål.healing} healing.")
+            antal_föremål.append(index)
+        print(f"\nMYNT: {spelare.pengar}\n")
+        input()
+        rensa()
       elif svar == "3":
+        rensa()
+        print(f"{spelare.namn}:")
+        print(f"MAX HP: {spelare.max_hp} --- HP: {spelare.hp} --- DMG: {spelare.dmg} --- RUSTNING: {spelare.rustning} ")
+        input()
+        rensa()
+      elif svar == "4":
+        rensa()
         print("--- REGLER OCH INSTRUKTIONER ---")
-        print("\n1. Klicka enter för att forstätta dialog/funktioner \n \n2. Tjäna mynt för ny utrustning \n \n3. Var inte snorre på spelet")
+        print("\n1. Klicka enter för att forstätta dialog/funktioner \n \n2. Tjäna mynt för ny utrustning \n \n3. Du healar till fullt hp efter varje strid \n \n4. Healing kan användas på fullt hp för att overheala")
         input()
         rensa()
       else:
@@ -233,24 +733,22 @@ def main():
                                            Tryck enter för att forsätta
 ''')
   rensa()
-  namn = input("\"VEM ÄR DU?\"\nSKRIV DITT NAMN --> ")
+  spelare.namn = input("VEM ÄR DU?\nSKRIV DITT NAMN --> ").capitalize()
   rensa()
-  input(f"\"HEJ {namn}, DU BEFINNER DIG JUST NU PÅ PLANETEN BORÅSUS...     Tryck enter för att forsätta\"").upper() 
+  input(f"HEJ {spelare.namn}, DU BEFINNER DIG JUST NU PÅ PLANETEN BORÅSUS...     Tryck enter för att forsätta")
   rensa()
-  input(f"FÖRBERED DIG PÅ DIN FÖRSTA STRID {namn}... ...     Tryck enter för att forsätta")
+  input(f"FÖRBERED DIG PÅ DIN FÖRSTA STRID {spelare.namn}... ...     Tryck enter för att forsätta")
   rensa()
-
-  # ALLA MONSTER:
   
 
-  strid(Leif, spelare, namn)
+  strid(Leif, spelare)
   print("Du överlevde din första strid, men resan är inte över än")
   input()
   rensa()
-  skid(alla_monster, spelare, namn)
+  skid(alla_monster, spelare)
 
-
-Leif = Monster("Leif", 20, 20, 10, 0, "Vass", 50, 1, r''' 
+# ALLA MONSTER:
+Leif = Monster("Leif", 20, 20, 10, 0, "Vass", 100, 1, r''' 
         [\__/]  
        / +  + \
   ⁂--- \vWWWWv/---⁅
@@ -259,24 +757,55 @@ Leif = Monster("Leif", 20, 20, 10, 0, "Vass", 50, 1, r'''
         ₼₼  ₼₼  
 ''')
 
-Rolf = Monster("Rolf", 30, 30, 15, 3, "Trubbig", 150, 1, r'''
-        _◺⨽₩₩₩₩₩⨼◿_
-      |           |
-      /   ⩊⩊⩊ ⩊⩊⩊   \
-    |     ⨸   ⨸     |
-    |    ⋀_____⋀    |   
-      \             /
-      ₼₼₼₼———————₼₼₼₼  
+Rolf = Monster("Rolf", 30, 30, 15, 3, "Trubbig", 250, 1, r'''
+       _◺⨽₩₩₩₩₩⨼◿ _
+      |            |
+     /   ⩊⩊⩊ ⩊⩊⩊    \
+    |     ⨸   ⨸      |
+    |    ⋀_____⋀     |   
+     \              /
+     ₼₼₼₼———————₼₼₼₼  
 ''')
 
-Rune = Monster("Rune", 60, 60, 20, 3, "Vass", 500, 1, r'''
+Hector = Monster("Hector", 40, 40, 20, 2, "Vass", 500, 1, r'''
+  <=======]}======
+    .-.   /|
+   _\"/_.'/
+ .'._._,.'
+ :/ \{}/
+{[  /--',----._
+    |          \\
+   : /-\ .--'\ / |
+    \\, ||    \|
+     \/ ||    ||
+
+''')
+
+Gargamel = Monster("Gargamel", 60, 60, 25, 2, "Trubbig", 750, 1, r'''
+   ,    ,    /\   /\
+  /( /\ )\  _\ \_/ /_
+  |\_||_/| < \_   _/ >
+  \______/  \|0   0|/
+    _\/_   _(_  ^  _)_
+   ( () ) /`\|V"""V|/`\
+     {}   \  \_____/  /
+     ()   /\   )=(   /\
+     {}  /  \_/\=/\_/  \
+     () |               |
+     {} |               |
+     () |               |
+     {}/                 \            
+  ''') 
+
+
+Rune = Monster("Rune", 100, 100, 20, 3, "Vass", 1000, 1, r'''
               _..--+~ -----_
           _-=~      ( .     )
       _-~     _.--=.\\´''```
     _~      _-       \\_\
-    =      _=          '--'
+    =     _=          '--'
   '      =                             .
-  :      :                              '=_. ___
+:       :                               '=_. ___
 |       ;                                  '~--.~.
 ;       ;                                       } |
 =        \            __..-...__             ~~ ~~~~
@@ -286,22 +815,117 @@ Rune = Monster("Rune", 60, 60, 20, 3, "Vass", 500, 1, r'''
     ~  ~~~~~  ~~         ~    ~~  ~~ ~~~ ~
 ''')
 
+Tate_warrior = Monster("Tate warrior", 125, 125, 25, 5, "Trubbig", 1250, 1, r''' 
+  .       +       *          |\    .                    .
+                              \\         *          .       +         .
+       *       .        +      \\
+                                \\      .      +                  *
+  .     .      +    .          {====}
+                                 (\\  ,,,,.         *      .           +
+    +       *        .     *      \(),~`~`~~,
+                                   \ ('_'|)))`  .             +
+   .    .       .      +      .     \ \=,((((                             /
+                                     \ !  )))),     +    .        *    +_/
+            +      *       .        ,/_Y_(( \)                        _/
+  --_.                             (  (   )\ \   *       ./\       . /~\~/v
+      \_.     .     T_________T     \     / ) )        ./   \       /
+         \,       '//////|\\\\\\'    )    \/ /       ./      \     /
+           \,     /IT--T--T--T-I\   /     (_]      ,/         \_  /
+             \,    I   U v U   I   |       |     ./             \/
+               \,  I U.==.==.U I   !__,    |    /                \
+                 \,I  |o=|=o|  I_.__|  \_~~/__,;                  \
+                  ,I__|=o|o=|__I_   |  /|  |                       \.
+                 /: ' : ' : ' : '\  |  ||  |
+  --------------;   :   :   :   : '.(_-(|__(-------------------------------
+  -----------------------------------\+/|\/:-------------------------------
+               `'                     )\|/\;                 `'
+       `'                            {,/ )\.]     `'
+                            `'           {,/                          `'
+          .         .                  .               ,            .
+''')
+
+Jesus = Monster("Jesus", 250, 250, 35, 5, "Vass", 2000, 1, r'''
+                     ()())((())() )())())
+                  ()((( ((         ) ) ( ))  
+                 () ( ));  \__,__/   ; ( ( )
+               )  (( )((    ⛧ | ⛧   ) ) ( )
+              ) () ) ) )|     |_    |)(   (  (
+             )) () ( ( (|   _____,  |(  ) (  ((
+            )(( ))  ) ) )\_       _/ )   ( ( )
+           ))   (   (  )  ( `-----' ) ( (  ) ( (
+          ) )   (  )( _____/      \_____ )     )(
+          )  (     ( /                  \ )  ) ( ( (
+        (    )   (( /        ..,,,.,,,.  \)    (     )
+                   /   ..,..(          ).,\.                   
+             ,..,,/,,,.(                    ).,..              _____
+          ,.(                                   ),,.,..,      //
+        ,,                                            .,)____/ /
+       (                                              )\______/
+        ,.,.                                       ,.)
+         /  (,,,..                           ,,..,)
+    ____/  /        (,..,,.            ,.,,,.,)  \  \
+   /_____/                (...,,,,.,.)            \ \
+ _//                                              / /
+                                                 //
+                                                 \
+''')
+
+Andrew_Tate = Monster("Andrew Tate", 250, 250, 35, 5, "Trubbig", 2000, 1, r'''
+        (              ..----------_.          
+          )           '             ``.                                
+          '          ) .=='   `===    `-           
+          . )        (  (0)    (0)     )                          
+            )        )     /           J          
+          (          |.   /      .     (                                  
+          $$         (.  (_'.   , )    |`                                 
+          ||         |  \`-....--'/    \                                
+         /||.         \  \ | | | /    / \.                              
+        //||(\         \  `-===-'    '   \o.                            
+        .//7' |)        `. --      /      Obaa              
+        (<<. / |     .a888b`.__.-'d\     OO8888888             
+        \  Y' |    .8888888aaaa88POOOOOO88888888888888.              
+          \  \ |   .888888888888888888888888888888888888              
+          |   |  .d88888P88888888888888888888888b8888888.             
+          b.--d .d88888P8888888888888888a:f888888|888888b             
+          88888b 888888|8888888888888888888888888\8888888
+''')
+
   
-alla_monster = [Leif, Rolf, Rune]
+alla_monster = [Leif, Rolf, Hector, Gargamel, Rune, Tate_warrior, Jesus, Andrew_Tate]
+
+alla_platser = ["Shoppen", "Lägret"]
 
 # ALLA SPELARE (BARA EN):
-spelare = Spelare(30, 30, 5, 0, 0, [])
+spelare = Spelare("" , 50, 50, 5, 0, 0, [], [])
 
 # ALLA VAPEN 
-svärd = Vapen("Svärd", 10, 1)
-klubba = Vapen("Klubba", 12, 1)
-båge = Vapen("Båge", 12, 1)
-
-alla_vapen = {"Svärd":svärd, "Klubba":klubba, "Båge":båge}
+rostigt_svärd = Vapen("Rostigt svärd", 10, 10 ,1)
+svärd = Vapen("Svärd", 10, 10 ,1)
+klubba = Vapen("Klubba", 12, 50, 1)
+båge = Vapen("Båge", 15, 100, 1)
+trollstav = Vapen("Trollstav", 25, 300, 1)
+pickadoll = Vapen("Pickadoll", 20, 300, 1)
+yxa = Vapen("Yxa", 30, 350, 1)
+treudd = Vapen("Treudd", 30, 500, 1)
+stort_svärd = Vapen("Stort_svärd", 40, 750, 1)
+diamant_svärd = Vapen("Diamant svärd", 50, 1000, 1)
 
 # ALLA FÖREMÅL
-äpple = Föremål("Äpple", 5, 0)
+äpple = Föremål("Äpple", 0, 5, 10)
+bomb = Föremål("Bomb", 10, 0, 20)
+bandage = Föremål("Bandage", 0, 15, 50)
+helande_dryck = Föremål("Helande dryck", 0, 50, 30)
 
+# ALLA RUSTNINGAR
+järnrustning = Rustning("Järnuppgradering", 3, 200)
+stålrustning = Rustning("Ståluppgradering", 5, 500)
+diamantrustning = Rustning("Diamantuppgradering", 10, 1000)
+
+föremål_till_salu = [äpple, bomb, bandage, helande_dryck]
+
+vapen_till_salu = [rostigt_svärd, pickadoll, yxa, diamant_svärd]
+
+rustning_till_salu = [järnrustning, stålrustning, diamantrustning]
 
 
 main()
